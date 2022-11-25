@@ -1,0 +1,163 @@
+<script context="module">
+  export async function load({ session }) {
+    if (session.user) {
+      return {
+        status: 302,
+        redirect: "/",
+      };
+    }
+    return {};
+  }
+</script>
+
+<script>
+  import { goto } from "$app/navigation";
+  import { notifications } from "$lib/notifications";
+  import Toast from "$lib/Toast.svelte";
+  import Icon from "@iconify/svelte";
+
+
+  let username = "";
+  let password = "";
+  let email = "";
+  let result = "";
+
+  async function submitForm() {
+    const res = await fetch("http://localhost:3000/api/user/register", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+      }),
+    });
+
+    if (res.status == 200) {
+      notifications.success(`Başarıyla Kayıt Olundu. Lütfen giriş yapınız`, 850);
+      setTimeout(() => {
+        goto("/login");
+      }, 850 );
+    } else {
+      notifications.danger(`${username} adlı bir kullanıcı zaten var.`, 850);
+    }
+  }
+</script>
+
+<svelte:head>
+<title>SHOPY : Kayıt Ol</title>
+</svelte:head>
+
+<div class="container">
+  <Toast />
+  <form>
+    <h3>Kayıt Ol</h3>
+
+    <label for="username">Kullanıcı Adı</label>
+    <input
+      type="text"
+      placeholder="Kullanıcı Adı"
+      id="username"
+      bind:value={username}
+      required
+    /> 
+    {#if username.length <6}
+      <Icon icon="entypo:circle-with-cross" inline={true} color="red" /><span style="color: #D1DEDE ;font-size:small">Kullanıcı adı en az 6 karakterden oluşmalı</span> 
+    {/if}
+
+    <label for="email">E-mail</label>
+    <input type="email" placeholder="E-mail" id="E-mail" bind:value={email} required />
+    {#if email.length <6}
+      <Icon icon="entypo:circle-with-cross" inline={true} color="red" /><span style="color: #D1DEDE; font-size:small">Geçerli bir email adresi giriniz.</span> 
+    {/if}
+
+    <label for="password">Parola</label>
+    <input
+      type="password"
+      placeholder="Parola"
+      id="password"
+      bind:value={password}
+      required
+    />
+    {#if password.length <6}
+      <Icon icon="entypo:circle-with-cross" inline={true} color="red" /><span style="color: #D1DEDE ;font-size:small">Parola en az 6 karakterden oluşmalı.</span> 
+    {/if}
+
+    <button type="button" disabled={username.length < 6 || email.length <6 || password.length < 6} on:click={submitForm}>Kayıt Ol</button>
+    <p>Zaten Üye misin ? Hemen <a href="/register">Giriş Yap</a></p>
+  </form>
+</div>
+
+<style lang="scss">
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
+  .container {
+    width: 100%;
+    height: 100%;
+    font-family: "Montserrat", sans-serif;
+    padding: 3em 0 7em 0;
+
+    form {
+      padding: 5em;
+      margin: 0 auto;
+      height: 600px;
+      width: 400px;
+      background-color: #003f91;
+      position: relative;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+      padding: 50px 35px;
+
+      * {
+        color: #ffffff;
+        letter-spacing: 0.5px;
+        outline: none;
+        border: none;
+      }
+
+      h3 {
+        font-size: 32px;
+        font-weight: 500;
+        line-height: 42px;
+        text-align: center;
+      }
+
+      label {
+        display: block;
+        margin-top: 30px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      input {
+        display: block;
+        height: 50px;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.07);
+        border-radius: 3px;
+        padding: 0 10px;
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 300;
+      }
+      button {
+        margin-top: 50px;
+        width: 100%;
+        background-color: #ffffff;
+        color: #080710;
+        padding: 15px 0;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      p {
+        text-align: center;
+      }
+    }
+  }
+</style>
